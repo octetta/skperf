@@ -186,10 +186,10 @@ void StripChart::drawStackedPlots() {
     fl_color(border_col);
     fl_rect(x(), y(), w(), h());
 
-    int margin_left = 75;
-    int margin_right = 160;
-    int margin_top = 12;
-    int margin_bottom = 12;
+    int margin_left = 65;
+    int margin_right = 140;
+    int margin_top = 10;
+    int margin_bottom = 10;
 
     int plot_x = x() + margin_left;
     int plot_w = w() - margin_left - margin_right;
@@ -206,6 +206,7 @@ void StripChart::drawStackedPlots() {
         int ry = y() + margin_top + idx * (plot_h + spacing);
         Fl_Color col = getMetricColor(key);
 
+        // Sub-chart Plot Area
         fl_color(panel_bg);
         fl_rectf(plot_x, ry, plot_w, plot_h);
         fl_color(panel_brd);
@@ -300,22 +301,30 @@ void StripChart::drawStackedPlots() {
 
         fl_pop_clip();
 
-        int rx = plot_x + plot_w + 12;
-        fl_font(FL_HELVETICA_BOLD, 12);
-        fl_color(col);
-        fl_draw(key.c_str(), rx, ry + 16);
+        // Right Sidebar Readout Panel (Metric stats)
+        int sb_x = plot_x + plot_w + 6;
+        int sb_w = margin_right - 10;
+        fl_color(panel_bg);
+        fl_rectf(sb_x, ry, sb_w, plot_h);
+        fl_color(panel_brd);
+        fl_rect(sb_x, ry, sb_w, plot_h);
 
-        fl_font(FL_HELVETICA_BOLD, 13);
+        int rx = sb_x + 8;
+        fl_font(FL_HELVETICA_BOLD, 11);
+        fl_color(col);
+        fl_draw(key.c_str(), rx, ry + 15);
+
+        fl_font(FL_HELVETICA_BOLD, 12);
         fl_color(val_col);
         snprintf(buf, sizeof(buf), "%.2f", val_latest);
-        fl_draw(buf, rx, ry + 34);
+        fl_draw(buf, rx, ry + 32);
 
-        fl_font(FL_HELVETICA, 10);
+        fl_font(FL_HELVETICA, 9);
         fl_color(label_col);
         snprintf(buf, sizeof(buf), "min: %.2f", val_min);
-        fl_draw(buf, rx, ry + 48);
+        fl_draw(buf, rx, ry + 45);
         snprintf(buf, sizeof(buf), "max: %.2f", val_max);
-        fl_draw(buf, rx, ry + 60);
+        fl_draw(buf, rx, ry + 56);
     }
 }
 
@@ -341,9 +350,9 @@ void StripChart::drawOverlayPlot() {
     fl_rect(x(), y(), w(), h());
 
     int margin_left = 65;
-    int margin_right = 160;
-    int margin_top = 15;
-    int margin_bottom = 15;
+    int margin_right = 140;
+    int margin_top = 12;
+    int margin_bottom = 12;
 
     int plot_x = x() + margin_left;
     int plot_w = w() - margin_left - margin_right;
@@ -419,12 +428,20 @@ void StripChart::drawOverlayPlot() {
 
     fl_pop_clip();
 
-    int rx = plot_x + plot_w + 12;
-    int ly = ry;
+    // Right Sidebar Legend Panel
+    int sb_x = plot_x + plot_w + 6;
+    int sb_w = margin_right - 10;
+    fl_color(panel_bg);
+    fl_rectf(sb_x, ry, sb_w, plot_h);
+    fl_color(panel_brd);
+    fl_rect(sb_x, ry, sb_w, plot_h);
+
+    int rx = sb_x + 8;
+    int ly = ry + 8;
     fl_font(FL_HELVETICA_BOLD, 12);
     fl_color(val_col);
-    fl_draw("Legend", rx, ly + 14);
-    ly += 25;
+    fl_draw("Legend", rx, ly + 10);
+    ly += 22;
 
     for (const auto& key : active_keys) {
         Fl_Color col = getMetricColor(key);
@@ -435,19 +452,19 @@ void StripChart::drawOverlayPlot() {
         }
 
         fl_color(col);
-        fl_rectf(rx, ly, 10, 10);
+        fl_rectf(rx, ly + 2, 8, 8);
 
-        fl_font(FL_HELVETICA, 11);
+        fl_font(FL_HELVETICA, 10);
         fl_color(col);
-        fl_draw(key.c_str(), rx + 15, ly + 9);
+        fl_draw(key.c_str(), rx + 13, ly + 9);
 
         char buf[32];
         snprintf(buf, sizeof(buf), "%.2f", val_latest);
-        fl_font(FL_HELVETICA_BOLD, 11);
+        fl_font(FL_HELVETICA_BOLD, 10);
         fl_color(val_col);
-        fl_draw(buf, rx + 15, ly + 22);
+        fl_draw(buf, rx + 13, ly + 20);
 
-        ly += 30;
+        ly += 26;
         if (ly > ry + plot_h - 20) break;
     }
 }

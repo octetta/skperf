@@ -319,9 +319,9 @@ public:
                     self->updateMetricButtons();
                     self->refresh_count++;
                     self->last_response_time = std::chrono::system_clock::now();
-                    self->updateStatus();
                 }
             }
+            self->updateStatus();
 
             double period = 2.0;
             if (self->refresh_input->value() && self->refresh_input->value()[0] != '\0') {
@@ -342,10 +342,11 @@ public:
         if (last_response_time.time_since_epoch().count() == 0) {
             last_response_out->value("never");
         } else {
-            auto t = std::chrono::system_clock::to_time_t(last_response_time);
-            std::ostringstream oss;
-            oss << std::put_time(std::localtime(&t), "%H:%M:%S");
-            last_response_out->value(oss.str().c_str());
+            auto now = std::chrono::system_clock::now();
+            auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - last_response_time).count();
+            if (elapsed_sec < 0) elapsed_sec = 0;
+            std::string status_str = std::to_string(elapsed_sec) + "s ago";
+            last_response_out->value(status_str.c_str());
         }
     }
 
