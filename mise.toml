@@ -1,2 +1,3 @@
 [tools]
 cmake = "latest"
+node = "latest"
