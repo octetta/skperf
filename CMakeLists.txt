@@ -26,6 +26,9 @@ add_executable(skperf
 
 target_include_directories(skperf PRIVATE include)
 target_link_libraries(skperf PRIVATE fltk fltk_images)
+if(WIN32)
+  target_link_libraries(skperf PRIVATE ws2_32)
+endif()
 target_compile_definitions(skperf PRIVATE SKPERF_VERSION="${SKPERF_VERSION}")
 
 # macOS App Bundle & Ad-Hoc Code Signing Configuration

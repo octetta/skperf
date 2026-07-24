@@ -287,13 +287,15 @@ public:
             if (port <= 0 || ip.empty()) return;
 
             if (udp.connect(ip, port)) {
-                udp.send("log 1");
+                udp.send("log 1\n");
                 status_box->label("Connected");
                 connect_btn->label("Disconnect");
                 updateConnectColors();
 
                 refresh_count = 0;
+                consecutive_misses = 0;
                 updateStatus();
+                Fl::remove_timeout(refresh_cb, this);
                 Fl::add_timeout(0.5, refresh_cb, this);
             }
         } else {
@@ -310,7 +312,22 @@ public:
     static void refresh_cb(void* data) {
         auto* self = static_cast<AudioMonitor*>(data);
         if (self->udp.isConnected()) {
-            self->udp.send("/a?");
+            if (self->consecutive_misses > 0) {
+                // Re-create socket only after 10 consecutive misses (20s of total silence)
+                if (self->consecutive_misses >= 10) {
+                    std::string ip = self->ip_input->value() ? self->ip_input->value() : "";
+                    int port = 0;
+                    if (self->port_input->value() && self->port_input->value()[0] != '\0') {
+                        try { port = std::stoi(self->port_input->value()); } catch (...) {}
+                    }
+                    if (port > 0 && !ip.empty()) {
+                        self->udp.connect(ip, port);
+                    }
+                }
+                self->udp.send("log 1\n");
+            }
+
+            self->udp.send("/a?\n");
             std::string resp = self->udp.receive(800);
             if (!resp.empty()) {
                 auto metrics = self->parseMetrics(resp);
@@ -319,7 +336,12 @@ public:
                     self->updateMetricButtons();
                     self->refresh_count++;
                     self->last_response_time = std::chrono::system_clock::now();
+                    self->consecutive_misses = 0;
+                } else {
+                    self->consecutive_misses++;
                 }
+            } else {
+                self->consecutive_misses++;
             }
             self->updateStatus();
 
@@ -352,22 +374,37 @@ public:
 
     std::map<std::string, double> parseMetrics(const std::string& data) {
         std::map<std::string, double> metrics;
-        auto extract = [&](const std::string& prefix) -> double {
-            size_t pos = data.find(prefix);
+
+        auto extract_val = [](const std::string& str, size_t start_pos, const std::string& key) -> double {
+            size_t pos = str.find(key, start_pos);
             if (pos == std::string::npos) return 0.0;
-            pos = data.find_first_of("0123456789.-", pos);
+            pos = str.find_first_of("0123456789.-", pos + key.length());
             if (pos == std::string::npos) return 0.0;
-            try { return std::stod(data.substr(pos)); } catch (...) { return 0.0; }
+            try { return std::stod(str.substr(pos)); } catch (...) { return 0.0; }
         };
 
-        metrics["overruns"]   = extract("overruns:");
-        metrics["cb_ms_last"] = extract("last");
-        metrics["cb_ms_avg"]  = extract("avg");
-        metrics["load_last"]  = extract("last");
-        metrics["load_avg"]   = extract("avg");
-        metrics["late_starts"]= extract("late-starts");
-        metrics["discont"]    = extract("discontinuities");
-        metrics["clipped"]    = extract("clipped-samples");
+        metrics["overruns"]    = extract_val(data, 0, "overruns:");
+        metrics["late_starts"] = extract_val(data, 0, "late-starts:");
+        metrics["discont"]     = extract_val(data, 0, "discontinuities:");
+        metrics["clipped"]     = extract_val(data, 0, "clipped-samples:");
+
+        size_t cb_pos = data.find("cb_ms:");
+        if (cb_pos != std::string::npos) {
+            metrics["cb_ms_last"] = extract_val(data, cb_pos, "last");
+            metrics["cb_ms_avg"]  = extract_val(data, cb_pos, "avg");
+        } else {
+            metrics["cb_ms_last"] = 0.0;
+            metrics["cb_ms_avg"]  = 0.0;
+        }
+
+        size_t load_pos = data.find("load:");
+        if (load_pos != std::string::npos) {
+            metrics["load_last"] = extract_val(data, load_pos, "last");
+            metrics["load_avg"]  = extract_val(data, load_pos, "avg");
+        } else {
+            metrics["load_last"] = 0.0;
+            metrics["load_avg"]  = 0.0;
+        }
 
         return metrics;
     }
@@ -394,6 +431,7 @@ private:
     StripChart* chart;
     UdpClient udp;
     int refresh_count = 0;
+    int consecutive_misses = 0;
     bool is_dark_mode = true;
     std::chrono::system_clock::time_point last_response_time;
 };
