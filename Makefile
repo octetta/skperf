@@ -10,4 +10,4 @@ clean:
 	rm -rf build
 
 run:
-	./build/audio_monitor
+	./build/skperf

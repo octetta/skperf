@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(AudioMonitor VERSION 1.0.0 LANGUAGES CXX)
+project(skperf VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -13,14 +13,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fltk)
 
-add_executable(audio_monitor
+add_executable(skperf
     src/main.cpp
     src/udp_client.cpp
     src/strip_chart.cpp
 )
 
-target_include_directories(audio_monitor PRIVATE include)
-target_link_libraries(audio_monitor PRIVATE fltk fltk_images)
+target_include_directories(skperf PRIVATE include)
+target_link_libraries(skperf PRIVATE fltk fltk_images)
 
 # Install
-install(TARGETS audio_monitor DESTINATION bin)
+install(TARGETS skperf DESTINATION bin)

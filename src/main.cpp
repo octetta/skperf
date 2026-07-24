@@ -22,7 +22,7 @@
 
 class AudioMonitor : public Fl_Double_Window {
 public:
-    AudioMonitor() : Fl_Double_Window(1220, 780, "Audio Performance Monitor") {
+    AudioMonitor() : Fl_Double_Window(1220, 780, "skperf - Audio Performance Monitor") {
         begin();
 
         // --- Top Control Panel Bar ---
