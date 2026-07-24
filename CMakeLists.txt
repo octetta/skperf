@@ -22,5 +22,24 @@ add_executable(skperf
 target_include_directories(skperf PRIVATE include)
 target_link_libraries(skperf PRIVATE fltk fltk_images)
 
+# macOS App Bundle & Ad-Hoc Code Signing Configuration
+if(APPLE)
+  set_target_properties(skperf PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_BUNDLE_NAME "skperf"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.skred.skperf"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+  )
+
+  find_program(CODESIGN_EXECUTABLE codesign)
+  if(CODESIGN_EXECUTABLE)
+    add_custom_command(TARGET skperf POST_BUILD
+      COMMAND ${CODESIGN_EXECUTABLE} --force --deep --sign - $<TARGET_BUNDLE_DIR:skperf>
+      COMMENT "Ad-hoc code signing skperf.app bundle"
+    )
+  endif()
+endif()
+
 # Install
 install(TARGETS skperf DESTINATION bin)

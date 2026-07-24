@@ -79,7 +79,7 @@ overruns: 0 cb_ms: last 1.42 avg 1.15 load: last 12.5% avg 10.2% late-starts: 0 
 
 ## Building and Running
 
-### Quick Build (using Makefile)
+### Quick Build (Linux / macOS / Windows)
 ```bash
 make builder
 ./build/skperf
@@ -90,5 +90,14 @@ make builder
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
-./skperf
+```
+
+### macOS App Bundle & Code Signing
+When building on macOS, CMake automatically:
+1. Package target `skperf.app` as a native macOS Application Bundle (`MACOSX_BUNDLE`).
+2. Performs automatic **Ad-Hoc Code Signing** (`codesign --force --deep --sign -`) as a post-build step to comply with macOS Gatekeeper and Apple Silicon execution policies.
+
+The app bundle can be launched directly:
+```bash
+open ./build/skperf.app
 ```
