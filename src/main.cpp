@@ -20,46 +20,53 @@
 #include "udp_client.h"
 #include "strip_chart.h"
 
+#ifndef SKPERF_VERSION
+#define SKPERF_VERSION "1.0.0"
+#endif
+
 class AudioMonitor : public Fl_Double_Window {
 public:
-    AudioMonitor() : Fl_Double_Window(1220, 780, "skperf - Audio Performance Monitor") {
+    AudioMonitor() : Fl_Double_Window(1220, 780, "skperf v" SKPERF_VERSION " - Audio Performance Monitor") {
         begin();
 
         // --- Top Control Panel Bar ---
         top_panel = new Fl_Group(15, 10, 1190, 42);
         top_panel->box(FL_FLAT_BOX);
 
-        ip_input = new Fl_Input(100, 18, 120, 26, "IP Address:");
+        app_title = new Fl_Box(25, 18, 110, 26, "skperf v" SKPERF_VERSION);
+        app_title->labelfont(FL_HELVETICA_BOLD);
+
+        ip_input = new Fl_Input(165, 18, 110, 26, "IP:");
         ip_input->value("127.0.0.1");
         ip_input->labelfont(FL_HELVETICA_BOLD);
 
-        port_input = new Fl_Int_Input(295, 18, 60, 26, "UDP Port:");
+        port_input = new Fl_Int_Input(315, 18, 55, 26, "Port:");
         port_input->value("60440");
         port_input->labelfont(FL_HELVETICA_BOLD);
 
-        refresh_input = new Fl_Int_Input(445, 18, 45, 26, "Refresh (s):");
+        refresh_input = new Fl_Int_Input(455, 18, 40, 26, "Refresh (s):");
         refresh_input->value("2");
         refresh_input->labelfont(FL_HELVETICA_BOLD);
 
-        connect_btn = new Fl_Button(505, 18, 95, 26, "Connect");
+        connect_btn = new Fl_Button(505, 18, 85, 26, "Connect");
         connect_btn->box(FL_BORDER_BOX);
         connect_btn->labelfont(FL_HELVETICA_BOLD);
         connect_btn->callback(connect_cb, this);
 
-        status_box = new Fl_Box(610, 18, 115, 26, "Disconnected");
+        status_box = new Fl_Box(600, 18, 105, 26, "Disconnected");
         status_box->box(FL_BORDER_BOX);
         status_box->labelfont(FL_HELVETICA_BOLD);
         status_box->align(FL_ALIGN_CENTER);
 
-        sep_box = new Fl_Box(735, 15, 2, 32);
+        sep_box = new Fl_Box(718, 15, 2, 32);
         sep_box->box(FL_FLAT_BOX);
 
         // Telemetry outputs
-        refresh_count_out = new Fl_Output(845, 18, 60, 26, "Refresh count:");
+        refresh_count_out = new Fl_Output(830, 18, 55, 26, "Refresh count:");
         refresh_count_out->value("0");
         refresh_count_out->labelfont(FL_HELVETICA_BOLD);
 
-        last_response_out = new Fl_Output(1015, 18, 80, 26, "Last response:");
+        last_response_out = new Fl_Output(990, 18, 75, 26, "Last response:");
         last_response_out->value("never");
         last_response_out->labelfont(FL_HELVETICA_BOLD);
 
@@ -122,6 +129,7 @@ public:
         Fl_Color input_txt   = dark ? FL_WHITE                    : fl_rgb_color(20, 25, 35);
         Fl_Color cursor_col  = dark ? fl_rgb_color(0, 220, 255)   : fl_rgb_color(0, 100, 220);
         Fl_Color label_txt   = dark ? fl_rgb_color(200, 210, 225) : fl_rgb_color(50, 60, 75);
+        Fl_Color title_txt   = dark ? fl_rgb_color(0, 220, 255)   : fl_rgb_color(0, 105, 210);
         Fl_Color out_bg      = dark ? fl_rgb_color(14, 16, 20)   : fl_rgb_color(238, 242, 248);
         Fl_Color out_txt     = dark ? fl_rgb_color(100, 220, 255) : fl_rgb_color(0, 105, 210);
         Fl_Color btn_bg      = dark ? fl_rgb_color(45, 52, 66)   : fl_rgb_color(205, 214, 228);
@@ -132,9 +140,10 @@ public:
         top_panel->color(panel_bg);
         toolbar_panel->color(toolbar_bg);
         sep_box->color(sep_color);
+        app_title->labelcolor(title_txt);
         toolbar_label->labelcolor(label_txt);
 
-        // Style Inputs and explicitly set bright visible cursor_color
+        // Style Inputs
         auto style_input = [&](Fl_Input* in) {
             in->color(input_bg);
             in->textcolor(input_txt);
@@ -364,6 +373,7 @@ public:
 
 private:
     Fl_Group* top_panel;
+    Fl_Box* app_title;
     Fl_Input* ip_input;
     Fl_Int_Input* port_input;
     Fl_Int_Input* refresh_input;

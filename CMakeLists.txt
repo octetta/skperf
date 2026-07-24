@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
-project(skperf VERSION 1.0.0 LANGUAGES CXX)
+
+# Read version string from VERSION file in repository root
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" SKPERF_VERSION_RAW)
+string(STRIP "${SKPERF_VERSION_RAW}" SKPERF_VERSION)
+
+project(skperf VERSION ${SKPERF_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -21,6 +26,7 @@ add_executable(skperf
 
 target_include_directories(skperf PRIVATE include)
 target_link_libraries(skperf PRIVATE fltk fltk_images)
+target_compile_definitions(skperf PRIVATE SKPERF_VERSION="${SKPERF_VERSION}")
 
 # macOS App Bundle & Ad-Hoc Code Signing Configuration
 if(APPLE)
@@ -28,8 +34,8 @@ if(APPLE)
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_BUNDLE_NAME "skperf"
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.skred.skperf"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-    MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${SKPERF_VERSION}"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${SKPERF_VERSION}"
   )
 
   find_program(CODESIGN_EXECUTABLE codesign)
