@@ -119,9 +119,9 @@ public:
             try { return std::stod(data.substr(pos)); } catch (...) { return 0.0; }
         };
 
-        metrics["callbacks"] = extract("callbacks:");
-        metrics["frames"] = extract("frames:");
-        metrics["samples"] = extract("samples:");
+        //metrics["callbacks"] = extract("callbacks:");
+        //metrics["frames"] = extract("frames:");
+        //metrics["samples"] = extract("samples:");
         metrics["overruns"] = extract("overruns:");
         metrics["cb_ms_last"] = extract("last");
         metrics["cb_ms_avg"]  = extract("avg");
