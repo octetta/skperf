@@ -4,10 +4,9 @@
 #include <cmath>
 
 StripChart::StripChart(int x, int y, int w, int h, const char* label) 
-    : Fl_Box(x, y, w, h, 0), max_points(500), min_y(0), max_y(100) {  // No label to avoid garbage
+    : Fl_Box(x, y, w, h, nullptr) {
     box(FL_DOWN_BOX);
     color(FL_BLACK);
-    labelcolor(FL_WHITE);
 }
 
 StripChart::~StripChart() {}
@@ -31,8 +30,19 @@ void StripChart::addDataPoint(const std::map<std::string, double>& metrics) {
 void StripChart::clear() {
     history.clear();
     metric_keys.clear();
+    disabled_metrics.clear();
     min_y = 0;
     max_y = 100;
+    redraw();
+}
+
+void StripChart::enableMetric(const std::string& key) {
+    disabled_metrics.erase(key);
+    redraw();
+}
+
+void StripChart::disableMetric(const std::string& key) {
+    disabled_metrics.insert(key);
     redraw();
 }
 
@@ -40,12 +50,12 @@ void StripChart::draw() {
     Fl_Box::draw();
     if (history.empty() || metric_keys.empty()) return;
 
-    int graph_w = w() - 170;
+    int graph_w = w() - 180; // more space for legend
     int graph_h = h() - 50;
     int base_x = x() + 20;
     int base_y = y() + 30;
 
-    // Grid lines
+    // Grid
     fl_color(FL_GRAY);
     for (int i = 0; i <= 5; ++i) {
         int yy = base_y + (graph_h * i / 5);
@@ -59,10 +69,13 @@ void StripChart::draw() {
     if (num_points < 2) return;
     int step = graph_w / (num_points - 1);
 
-    // Plot lines
+    // Plot
+    int visible_idx = 0;
     for (size_t k = 0; k < metric_keys.size(); ++k) {
-        fl_color(static_cast<Fl_Color>(FL_RED + (k % 8)));
-        std::string key = metric_keys[k];
+        const std::string& key = metric_keys[k];
+        if (disabled_metrics.count(key)) continue;
+
+        fl_color(static_cast<Fl_Color>(FL_RED + (visible_idx % 8)));
         int prev_px = -1, prev_py = -1;
 
         for (int i = 0; i < num_points; ++i) {
@@ -79,16 +92,22 @@ void StripChart::draw() {
             prev_px = px;
             prev_py = py;
         }
+        visible_idx++;
     }
 
-    // Legend aligned to grid lines on the right
+    // Legend aligned to grid
     fl_color(FL_WHITE);
     fl_font(FL_HELVETICA, 12);
-    int legend_x = x() + w() - 155;
-    int legend_y_start = base_y + 4;  // align with first grid
+    int legend_x = x() + w() - 175;
+    int legend_y_start = base_y + 4;
 
-    for (size_t k = 0; k < metric_keys.size() && k < 6; ++k) {  // limit to 6 for space
-        int yy = legend_y_start + (graph_h * k / 5);
-        fl_draw(metric_keys[k].c_str(), legend_x, yy);
+    visible_idx = 0;
+    for (size_t k = 0; k < metric_keys.size() && visible_idx < 8; ++k) {
+        const std::string& key = metric_keys[k];
+        if (disabled_metrics.count(key)) continue;
+
+        int yy = legend_y_start + (graph_h * visible_idx / 5);
+        fl_draw(key.c_str(), legend_x, yy);
+        visible_idx++;
     }
 }

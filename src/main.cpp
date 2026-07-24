@@ -4,6 +4,7 @@
 #include <FL/Fl_Int_Input.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Output.H>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -17,36 +18,41 @@
 
 class AudioMonitor : public Fl_Window {
 public:
-    AudioMonitor() : Fl_Window(960, 680, "Audio Performance Monitor") {
+    AudioMonitor() : Fl_Window(1120, 740, "Audio Performance Monitor") {
         begin();
 
-        // Controls row
-        ip_input = new Fl_Input(120, 20, 160, 25, "IP Address:");
+        // Top controls - generous spacing
+        ip_input = new Fl_Input(140, 15, 170, 25, "IP Address:");
         ip_input->value("127.0.0.1");
 
-        port_input = new Fl_Int_Input(370, 20, 80, 25, "UDP Port:");
+        port_input = new Fl_Int_Input(390, 15, 80, 25, "UDP Port:");
         port_input->value("60440");
 
-        refresh_input = new Fl_Int_Input(530, 20, 60, 25, "Refresh (s):");
+        refresh_input = new Fl_Int_Input(550, 15, 60, 25, "Refresh (s):");
         refresh_input->value("2");
 
-        connect_btn = new Fl_Button(670, 18, 110, 30, "Connect");
+        connect_btn = new Fl_Button(680, 12, 120, 32, "Connect");
         connect_btn->callback(connect_cb, this);
 
-        status_box = new Fl_Box(810, 22, 130, 25, "Disconnected");
+        status_box = new Fl_Box(830, 17, 250, 25, "Disconnected");
         status_box->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-        // Status row
-        refresh_count_box = new Fl_Box(20, 65, 200, 25, "Refresh count: 0");
-        last_response_box = new Fl_Box(280, 65, 280, 25, "Last response: never");
+        // Status line
+        refresh_count_out = new Fl_Output(20, 55, 220, 25, "Refresh count:");
+        refresh_count_out->value("0");
 
-        // Chart
-        chart = new StripChart(20, 120, 920, 530, "Performance Metrics");
+        last_response_out = new Fl_Output(280, 55, 260, 25, "Last response:");
+        last_response_out->value("never");
+
+        // Chart - leave space for legend on right
+        chart = new StripChart(20, 100, 1060, 610);
 
         end();
         resizable(this);
-        size_range(700, 500);
+        size_range(900, 600);
     }
+
+    // Paste the rest of the class methods from the previous full main.cpp (toggleConnect, refresh_cb, updateStatus, parseMetrics)
 
     static void connect_cb(Fl_Widget*, void* data) {
         static_cast<AudioMonitor*>(data)->toggleConnect();
@@ -96,16 +102,15 @@ public:
     }
 
     void updateStatus() {
-        std::string count_str = "Refresh count: " + std::to_string(refresh_count);
-        refresh_count_box->label(count_str.c_str());
+        refresh_count_out->value(std::to_string(refresh_count).c_str());
 
         if (last_response_time.time_since_epoch().count() == 0) {
-            last_response_box->label("Last response: never");
+            last_response_out->value("never");
         } else {
             auto t = std::chrono::system_clock::to_time_t(last_response_time);
             std::ostringstream oss;
-            oss << "Last response: " << std::put_time(std::localtime(&t), "%H:%M:%S");
-            last_response_box->label(oss.str().c_str());
+            oss << std::put_time(std::localtime(&t), "%H:%M:%S");
+            last_response_out->value(oss.str().c_str());
         }
     }
 
@@ -140,8 +145,8 @@ private:
     Fl_Int_Input* refresh_input;
     Fl_Button* connect_btn;
     Fl_Box* status_box;
-    Fl_Box* refresh_count_box;
-    Fl_Box* last_response_box;
+    Fl_Output* refresh_count_out;
+    Fl_Output* last_response_out;
     StripChart* chart;
     UdpClient udp;
     int refresh_count = 0;
