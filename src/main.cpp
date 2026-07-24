@@ -18,41 +18,36 @@
 
 class AudioMonitor : public Fl_Window {
 public:
-    AudioMonitor() : Fl_Window(1120, 740, "Audio Performance Monitor") {
+    AudioMonitor() : Fl_Window(1220, 760, "Audio Performance Monitor") {
         begin();
 
-        // Top controls - generous spacing
-        ip_input = new Fl_Input(140, 15, 170, 25, "IP Address:");
+        ip_input = new Fl_Input(170, 15, 170, 25, "IP Address:");
         ip_input->value("127.0.0.1");
 
-        port_input = new Fl_Int_Input(390, 15, 80, 25, "UDP Port:");
+        port_input = new Fl_Int_Input(430, 15, 80, 25, "UDP Port:");
         port_input->value("60440");
 
-        refresh_input = new Fl_Int_Input(550, 15, 60, 25, "Refresh (s):");
+        refresh_input = new Fl_Int_Input(590, 15, 60, 25, "Refresh (s):");
         refresh_input->value("2");
 
-        connect_btn = new Fl_Button(680, 12, 120, 32, "Connect");
+        connect_btn = new Fl_Button(720, 12, 120, 32, "Connect");
         connect_btn->callback(connect_cb, this);
 
-        status_box = new Fl_Box(830, 17, 250, 25, "Disconnected");
+        status_box = new Fl_Box(880, 17, 280, 25, "Disconnected");
         status_box->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
-        // Status line
-        refresh_count_out = new Fl_Output(20, 55, 220, 25, "Refresh count:");
+        refresh_count_out = new Fl_Output(40, 55, 260, 25, "Refresh count:");
         refresh_count_out->value("0");
 
-        last_response_out = new Fl_Output(280, 55, 260, 25, "Last response:");
+        last_response_out = new Fl_Output(340, 55, 280, 25, "Last response:");
         last_response_out->value("never");
 
-        // Chart - leave space for legend on right
-        chart = new StripChart(20, 100, 1060, 610);
+        chart = new StripChart(20, 100, 1170, 630);
 
         end();
         resizable(this);
-        size_range(900, 600);
+        size_range(1050, 600);
     }
-
-    // Paste the rest of the class methods from the previous full main.cpp (toggleConnect, refresh_cb, updateStatus, parseMetrics)
 
     static void connect_cb(Fl_Widget*, void* data) {
         static_cast<AudioMonitor*>(data)->toggleConnect();
