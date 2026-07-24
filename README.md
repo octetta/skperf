@@ -79,25 +79,52 @@ overruns: 0 cb_ms: last 1.42 avg 1.15 load: last 12.5% avg 10.2% late-starts: 0 
 
 ## Building and Running
 
-### Quick Build (Linux / macOS / Windows)
+### Build Prerequisites & Platform Expectations
+
+- **Linux**:
+  - Compiler: GCC 8+ or Clang 8+ (C++17 support).
+  - Tools: `cmake` (>= 3.14), `make` or `ninja`.
+  - System Dependencies: Standard X11/OpenGL development libraries (e.g. `libx11-dev`, `libxft-dev`, `libxext-dev`, `libxinerama-dev`, `libxcursor-dev`, `libxrender-dev`, `libgl1-mesa-dev` on Debian/Ubuntu, or `xorg-x11-server-devel`, `libXft-devel` on Fedora/RHEL).
+- **macOS**:
+  - Tools: Xcode Command Line Tools (`clang` / `clang++`), `cmake` (>= 3.14).
+  - Output: Package target `skperf.app` native application bundle with automatic ad-hoc code signing (`codesign --force --deep --sign -`).
+- **Windows (Standard MSVC / MinGW)**:
+  - Tools: Visual Studio 2019/2022 (with C++ workload), MinGW-w64, or Clang, plus `cmake` (>= 3.14).
+  - Libraries: Automatically links `ws2_32` for Windows Winsock sockets.
+- **Windows (Zig + Ninja Toolchain)**:
+  - Tools: `zig` (0.10+), `ninja`, `cmake` (>= 3.14).
+  - `zig c++` acts as a drop-in Clang compiler driver for CMake.
+
+---
+
+### Quick Build (Linux / macOS / Posix)
 ```bash
 make builder
 ./build/skperf
 ```
 
-### Manual CMake Build
+### Standard CMake Build (Cross-Platform)
+
 ```bash
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 ```
 
-### macOS App Bundle & Code Signing
-When building on macOS, CMake automatically:
-1. Package target `skperf.app` as a native macOS Application Bundle (`MACOSX_BUNDLE`).
-2. Performs automatic **Ad-Hoc Code Signing** (`codesign --force --deep --sign -`) as a post-build step to comply with macOS Gatekeeper and Apple Silicon execution policies.
+### Windows Build with Zig & Ninja
 
-The app bundle can be launched directly:
+If building on Windows using **Zig** as the compiler with **Ninja**:
+
+```cmd
+mkdir build
+cd build
+cmake .. -G Ninja -DCMAKE_C_COMPILER="zig;cc" -DCMAKE_CXX_COMPILER="zig;c++" -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+```
+
+### macOS App Bundle & Execution
+When building on macOS, the native `.app` bundle is generated and signed automatically:
+
 ```bash
 open ./build/skperf.app
 ```
