@@ -26,7 +26,7 @@ public:
         begin();
 
         // --- Top Control Panel Bar ---
-        top_panel = new Fl_Box(15, 10, 1190, 42);
+        top_panel = new Fl_Group(15, 10, 1190, 42);
         top_panel->box(FL_FLAT_BOX);
 
         ip_input = new Fl_Input(100, 18, 120, 26, "IP Address:");
@@ -63,8 +63,10 @@ public:
         last_response_out->value("never");
         last_response_out->labelfont(FL_HELVETICA_BOLD);
 
+        top_panel->end();
+
         // --- Metric Lines Toolbar (Row 2, above strip chart lines) ---
-        toolbar_panel = new Fl_Box(15, 58, 1190, 40);
+        toolbar_panel = new Fl_Group(15, 58, 1190, 40);
         toolbar_panel->box(FL_FLAT_BOX);
 
         toolbar_label = new Fl_Box(25, 65, 90, 26, "Metric Lines:");
@@ -87,6 +89,8 @@ public:
         clear_btn->box(FL_BORDER_BOX);
         clear_btn->labelfont(FL_HELVETICA_BOLD);
         clear_btn->callback(clear_cb, this);
+
+        toolbar_panel->end();
 
         // --- Strip Chart ---
         chart = new StripChart(15, 105, 1190, 660);
@@ -220,7 +224,6 @@ public:
         }
 
         metric_btn_group->end();
-        metric_btn_group->redraw();
         toolbar_panel->redraw();
     }
 
@@ -311,7 +314,6 @@ public:
                 }
             }
 
-            // Exception-safe parsing of refresh period
             double period = 2.0;
             if (self->refresh_input->value() && self->refresh_input->value()[0] != '\0') {
                 try {
@@ -361,7 +363,7 @@ public:
     }
 
 private:
-    Fl_Box* top_panel;
+    Fl_Group* top_panel;
     Fl_Input* ip_input;
     Fl_Int_Input* port_input;
     Fl_Int_Input* refresh_input;
@@ -371,7 +373,7 @@ private:
     Fl_Output* refresh_count_out;
     Fl_Output* last_response_out;
 
-    Fl_Box* toolbar_panel;
+    Fl_Group* toolbar_panel;
     Fl_Box* toolbar_label;
     Fl_Group* metric_btn_group;
     Fl_Button* mode_btn;
